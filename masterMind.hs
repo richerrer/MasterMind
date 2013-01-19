@@ -50,6 +50,12 @@ score_second_part array1 array2 num_enLista contador = if (head array1) `elem` a
 score_complete ::[Int]->[Int]->[Int]
 score_complete array1 array2 = [(4-length (fst(score_first_part array1 array2 ([],[])))),score_second_part (fst(score_first_part array1 array2 ([],[]))) (snd(score_first_part array1 array2 ([],[]))) [] 0 ]														 
 
+{-
+Funcion leer_archivo obtiene el codigo que esta escrito en el archivo de texto code.txt y lo retorna como un String.
+-}
+leer_archivo :: IO String
+leer_archivo = readFile "code.txt"
+
 main::IO()
 main=do
 	 let
