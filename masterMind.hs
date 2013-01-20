@@ -1,12 +1,67 @@
+import System.Random
 {-
 Funcion generar_combinaciones que recibe como parametro una lista de tuplas que contiene un arreglo y un entero y,
 me genera todas las posibles combinaciones de 4 digitos del 1 al 6.
+maino=do
+	gen <- newStdGen
+	let
+		nombre = gen
+		x = fst(randomR (1,6)(nombre) :: (Int, StdGen))
+	putStrLn $ show (x)
 -}
 generar_combinaciones :: [([Int],Int)]
 generar_combinaciones = let
                          numeros =[1..6]
                          combinaciones = [([w,x,y,z],0)|w<-numeros,x<-numeros,y<-numeros,z<-numeros]
-					   in combinaciones
+					    in combinaciones
+maino=do
+	gen1 <- newStdGen
+	gen2 <- newStdGen
+	gen3 <- newStdGen
+	gen4 <- newStdGen
+	let
+		rand1 = gen1
+		rand2 = gen2
+		rand3 = gen3
+		rand4 = gen4
+		x = [fst(randomR (1,6)(rand1) :: (Int, StdGen)),fst(randomR (1,6)(rand2) :: (Int, StdGen)),fst(randomR (1,6)(rand3) :: (Int, StdGen)),fst(randomR (1,6)(rand4) :: (Int, StdGen))]
+	putStr $ "el numero es :"
+	imprime x
+{-
+Funcion step2 que recibe el codigo potencial, los arreglos de los numeros de las posiciones a elegir, un arreglo de las posiciones que no los puede 
+poner nuevamente un arreglo de arreglos con los numeros elegidos que al principio se envia vacio para poder ir colocando en el los numeors con las
+nuevas posiciones ejemplo [[5,2],[3,1]] 5 en la 2 posicion y 3 en la primera y por ultimo un contador que se envia en 1.
+-}
+step2::[Int]->[Int]->[Int]->[[Int]]->Int->[[Int]]
+step2 cfg random incorrect_position finish_array 5 = finish_array 
+step2 cfg random incorrect_position finish_array iterador = if iterador `elem` random 
+                                                             then
+															  let new_pos = new_position iterador incorrect_position (1)
+															      new_incorrect_position = new_pos:incorrect_position
+															  in step2 (tail cfg) random (new_incorrect_position) ([head cfg,new_pos]:finish_array)(iterador+1)
+															 else step2 (tail cfg) random (incorrect_position) finish_array(iterador+1)
+
+{-
+Funcion new_position que recibe el numero de la posicion en la que estoy y una lista con las posiciones a las que no me puedo mover, y un entero que al principio se envia como 1
+para que nos ayuda en que posicion nos estamos moviendo es decir un iterador. Si todas las posiciones estan ocupadas sevuelve 0 ya que no puede moverse
+a ninguna.
+-}		
+new_position :: Int->[Int]->Int->Int
+new_position actually_pos prohibited_pos 5 = 0
+new_position actually_pos prohibited_pos contador = if not(contador `elem` prohibited_pos) && contador /= actually_pos
+                                                     then contador
+													 else new_position actually_pos prohibited_pos (contador+1)
+{-
+Funcion que imprime un arreglo
+-}	
+imprime :: [Int]->IO()
+imprime [] = putStr ""
+imprime x = do
+            putStr $ show(head x)++" "
+            imprime (tail x)
+
+random_array:: Int ->[Int]
+random_array generador = [fst(random(mkStdGen (generador+1)) :: (Int, StdGen)),fst(random(mkStdGen (generador+2)) :: (Int, StdGen)),fst(random(mkStdGen (generador+3)) :: (Int, StdGen)),fst(random(mkStdGen (generador+4)) :: (Int, StdGen))]
 {-
 Funcion recorrer_lista que recibe como parametros una lista de tuplas que contiene un arreglo y un entero, en nuestro caso
 la lista con todas las combinaciones y tambien una lista,, la cual compara si alguna esta en eela devuelve 1 caso contarrio 0.
@@ -47,6 +102,22 @@ score_second_part array1 array2 num_enLista contador = if (head array1) `elem` a
 														       then score_second_part (tail array1) array2 (head array1:num_enLista) (contador+2)
 															   else score_second_part (tail array1) array2 (head array1:num_enLista) (contador+1)
                                                          else score_second_part (tail array1) array2 num_enLista contador	
+{-
+Funcion ckeck_random para de una lista de numeros aleatorios elegir cuantos de estos numeros (2 parametro) quiero elegir sin que se repitan. El 3 parametro
+se lo envio como 0 al principio y al final me indica cuantos numeros llevo en mi lista resultado, si este numero coincide con el numero que yo quiero
+obtener me devuelve la lista. El cuarto parametro me indica que numeros de la lsita del 1 parametro no quiero obtener y el 5 parametro es la lista resultado q 
+al principio se nevia vacia.
+-}
+ckeck_random::[Int]->Int->Int->[Int]->[Int]->[Int]
+ckeck_random random number contador prohibited_number result_random = if number == contador
+                                                                       then result_random
+																	   else
+                                                                        if head random `elem` prohibited_number
+                                                                         then ckeck_random (tail random) number contador prohibited_number result_random 
+														                 else ckeck_random (tail random) number (contador+1) ((head random):prohibited_number)(head random:result_random)
+{-
+Funcion score complete que da el resultado completo (haciendo uso de las demas funciones) del code maker
+-}
 score_complete ::[Int]->[Int]->[Int]
 score_complete array1 array2 = [(4-length (fst(score_first_part array1 array2 ([],[])))),score_second_part (fst(score_first_part array1 array2 ([],[]))) (snd(score_first_part array1 array2 ([],[]))) [] 0 ]														 
 
