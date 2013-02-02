@@ -59,3 +59,22 @@ new_position actually_pos prohibited_pos 5 = 0
 new_position actually_pos prohibited_pos contador = if not(contador `elem` prohibited_pos) && contador /= actually_pos
                                                      then contador
 													 else new_position actually_pos prohibited_pos (contador+1)
+													 
+{-
+Funcion recorrer_lista que recibe como parametros una lista de tuplas que contiene un arreglo y un entero, en nuestro caso
+la lista con todas las combinaciones y tambien una lista,, la cual compara si alguna esta en eela devuelve 1 caso contarrio 0.
+-}					   
+recorrer_lista :: [([Int],Int)]-> [Int] -> Int
+recorrer_lista [] num = 0
+recorrer_lista x num = if fst (head x) == num
+                        then 1
+                        else recorrer_lista (tail x) num
+{-
+Funcion contar_num recibe una lista , el numero q se desea buscar y el contador q por defecto se enviara como 0 y retorna el numero de veces q se encuentra
+ese numero
+-}					   
+contar_num :: [Int]-> Int->Int->Int
+contar_num [] num contador = contador
+contar_num  array num contador = if head array == num
+                                  then contar_num(tail array) num (contador+1)
+                                  else contar_num (tail array) num (contador)
