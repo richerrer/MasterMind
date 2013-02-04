@@ -100,3 +100,21 @@ score_second_part array1 array2 num_enLista contador = if (head array1) `elem` a
 														       then score_second_part (tail array1) array2 (head array1:num_enLista) (contador+2)
 															   else score_second_part (tail array1) array2 (head array1:num_enLista) (contador+1)
                                                          else score_second_part (tail array1) array2 num_enLista contador	
+{-
+Funcion ckeck_random para, de una lista de numeros aleatorios elegir cuantos de estos numeros (2 parametro) quiero elegir sin que se repitan. El 3 parametro
+se lo envio como 0 al principio y al final me indica cuantos numeros llevo en mi lista resultado, si este numero coincide con el numero que yo quiero
+obtener me devuelve la lista. El cuarto parametro me indica que numeros de la lsita del 1 parametro no quiero obtener y el 5 parametro es la lista resultado q 
+al principio se nevia vacia.
+-}
+ckeck_random::[Int]->Int->Int->[Int]->[Int]->[Int]
+ckeck_random random number contador prohibited_number result_random = if number == contador
+                                                                       then result_random
+																	   else
+                                                                        if head random `elem` prohibited_number
+                                                                         then ckeck_random (tail random) number contador prohibited_number result_random 
+														                 else ckeck_random (tail random) number (contador+1) ((head random):prohibited_number)(head random:result_random)
+{-
+Funcion score complete que da el resultado completo (haciendo uso de las demas funciones) del code maker score_complete[codigo][codigo a comprobar]
+-}
+score_complete ::[Int]->[Int]->[Int]
+score_complete array1 array2 = [(4-length (fst(score_first_part array1 array2 ([],[])))),score_second_part (fst(score_first_part array1 array2 ([],[]))) (snd(score_first_part array1 array2 ([],[]))) [] 0 ]														 
