@@ -118,3 +118,20 @@ Funcion score complete que da el resultado completo (haciendo uso de las demas f
 -}
 score_complete ::[Int]->[Int]->[Int]
 score_complete array1 array2 = [(4-length (fst(score_first_part array1 array2 ([],[])))),score_second_part (fst(score_first_part array1 array2 ([],[]))) (snd(score_first_part array1 array2 ([],[]))) [] 0 ]														 
+{-
+Funcion eliminar_segunCodigo que coloca como segundo elemnto del arreglo del codigo enviado, el 1 para especificar que ya fue selccionado ese numero
+-}
+eliminar_segunCodigo ::[([Int],Int)]->[Int]->[([Int],Int)]->[([Int],Int)]
+eliminar_segunCodigo [] codigo nuevas_combinaciones = nuevas_combinaciones
+eliminar_segunCodigo combinaciones codigo nuevas_combinaciones = if fst(head combinaciones)==codigo && snd(head combinaciones)==0
+                                                                  then eliminar_segunCodigo (tail combinaciones) codigo ((fst(head combinaciones),1):nuevas_combinaciones)
+																  else eliminar_segunCodigo (tail combinaciones) codigo ((fst(head combinaciones),snd(head combinaciones)):nuevas_combinaciones)
+{-
+Funcion eliminar_segunElementos que recibe las combinaciones el codigo y la nueva lista de combinaciones que se envia al principio como vacia para
+devolverla llena nuevamente modificando (colocando 1) a todas las posibles combinaciones que contengan un numero de la lista
+-}
+eliminar_segunElementos :: [([Int],Int)]->[Int]->[([Int],Int)]->[([Int],Int)]
+eliminar_segunElementos  [] codigo nuevas_combinaciones = nuevas_combinaciones
+eliminar_segunElementos combinaciones codigo nuevas_combinaciones =if existe_num_enList (fst(head combinaciones)) (codigo)==0 && snd(head combinaciones)==0 
+                                                                     then eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),0):nuevas_combinaciones)
+                                                                     else eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),1):nuevas_combinaciones)
