@@ -100,3 +100,54 @@ score_second_part array1 array2 num_enLista contador = if (head array1) `elem` a
 														       then score_second_part (tail array1) array2 (head array1:num_enLista) (contador+2)
 															   else score_second_part (tail array1) array2 (head array1:num_enLista) (contador+1)
                                                          else score_second_part (tail array1) array2 num_enLista contador	
+{-
+Funcion ckeck_random para, de una lista de numeros aleatorios elegir cuantos de estos numeros (2 parametro) quiero elegir sin que se repitan. El 3 parametro
+se lo envio como 0 al principio y al final me indica cuantos numeros llevo en mi lista resultado, si este numero coincide con el numero que yo quiero
+obtener me devuelve la lista. El cuarto parametro me indica que numeros de la lsita del 1 parametro no quiero obtener y el 5 parametro es la lista resultado q 
+al principio se nevia vacia.
+-}
+ckeck_random::[Int]->Int->Int->[Int]->[Int]->[Int]
+ckeck_random random number contador prohibited_number result_random = if number == contador
+                                                                       then result_random
+																	   else
+                                                                        if head random `elem` prohibited_number
+                                                                         then ckeck_random (tail random) number contador prohibited_number result_random 
+														                 else ckeck_random (tail random) number (contador+1) ((head random):prohibited_number)(head random:result_random)
+{-
+Funcion score complete que da el resultado completo (haciendo uso de las demas funciones) del code maker score_complete[codigo][codigo a comprobar]
+-}
+score_complete ::[Int]->[Int]->[Int]
+score_complete array1 array2 = [(4-length (fst(score_first_part array1 array2 ([],[])))),score_second_part (fst(score_first_part array1 array2 ([],[]))) (snd(score_first_part array1 array2 ([],[]))) [] 0 ]														 
+{-
+Funcion eliminar_segunCodigo que coloca como segundo elemnto del arreglo del codigo enviado, el 1 para especificar que ya fue selccionado ese numero
+-}
+eliminar_segunCodigo ::[([Int],Int)]->[Int]->[([Int],Int)]->[([Int],Int)]
+eliminar_segunCodigo [] codigo nuevas_combinaciones = nuevas_combinaciones
+eliminar_segunCodigo combinaciones codigo nuevas_combinaciones = if fst(head combinaciones)==codigo && snd(head combinaciones)==0
+                                                                  then eliminar_segunCodigo (tail combinaciones) codigo ((fst(head combinaciones),1):nuevas_combinaciones)
+																  else eliminar_segunCodigo (tail combinaciones) codigo ((fst(head combinaciones),snd(head combinaciones)):nuevas_combinaciones)
+{-
+Funcion eliminar_segunElementos que recibe las combinaciones el codigo y la nueva lista de combinaciones que se envia al principio como vacia para
+devolverla llena nuevamente modificando (colocando 1) a todas las posibles combinaciones que contengan un numero de la lista
+-}
+eliminar_segunElementos :: [([Int],Int)]->[Int]->[([Int],Int)]->[([Int],Int)]
+eliminar_segunElementos  [] codigo nuevas_combinaciones = nuevas_combinaciones
+eliminar_segunElementos combinaciones codigo nuevas_combinaciones =if existe_num_enList (fst(head combinaciones)) (codigo)==0 && snd(head combinaciones)==0 
+                                                                     then eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),0):nuevas_combinaciones)
+                                                                     else eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),1):nuevas_combinaciones)
+{-
+Funcion existe_num_enList que recibe la lista de las conjeturas posibles y compara si algun numero de esta, se encuentra en la segunda lista que es del codigo seleccionado y devuelve 1 s asi lo es sino devuelve 0 que significa que ningun numero de las listas coinciden
+-}
+existe_num_enList :: [Int]->[Int]->Int
+existe_num_enList [] array2 = 0
+existe_num_enList array1 array2 = if head array1 `elem` array2
+                                   then 1
+								   else existe_num_enList (tail array1) array2
+{-
+Funcion comparar_existencia_codigo que compara de las combinaciones si el codigo enviado ya fue anteriormente seleccionado
+-}
+comparar_existencia_codigo ::[([Int],Int)]->[Int]->Bool
+comparar_existencia_codigo [] guess_code = False
+comparar_existencia_codigo combinaciones guess_code = if fst (head combinaciones)== guess_code && snd (head combinaciones) ==1
+                                                         then True
+													     else comparar_existencia_codigo (tail combinaciones) guess_code
