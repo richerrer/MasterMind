@@ -134,6 +134,7 @@ eliminar_segunElementos :: [([Int],Int)]->[Int]->[([Int],Int)]->[([Int],Int)]
 eliminar_segunElementos  [] codigo nuevas_combinaciones = nuevas_combinaciones
 eliminar_segunElementos combinaciones codigo nuevas_combinaciones =if existe_num_enList (fst(head combinaciones)) (codigo)==0 && snd(head combinaciones)==0 
                                                                      then eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),0):nuevas_combinaciones)
+
                                                                      else eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),1):nuevas_combinaciones)
 {-
 Funcion existe_num_enList que recibe la lista de las conjeturas posibles y compara si algun numero de esta, se encuentra en la segunda lista que es del codigo seleccionado y devuelve 1 s asi lo es sino devuelve 0 que significa que ningun numero de las listas coinciden
