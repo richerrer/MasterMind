@@ -210,3 +210,31 @@ result_fornew_cfg array1 array2 result_Array iterator = if snd(head array1) == i
                                                              else result_fornew_cfg (tail array1) (array2) (result_Array) (iterator)
 for_score_1_3 :: [Int]->[(Int,Int)]
 for_score_1_3 [x,y,z] =[(x,z),(y,x),(z,y)]
+
+{-
+Funcion para el paso 2 para el score 1 3 que toma del arreglo [x,y,z] y cambia las posiciones [z,x,y] es decir si el arreglo es [1,3,2] devuelve [2,1,3] que quiere decir que el elemento de la posicion 1 lo coloca en la 2 el de la 3 en la 1 y el de la 2 en la 3 
+-}
+principal_secondpartfor_score_1_3 ::[Int]->Int->[Int]->[(Int,Int)]->[(Int,Int)]
+principal_secondpartfor_score_1_3 [] iterator [x,y,z] array_result = array_result
+principal_secondpartfor_score_1_3 cfg iterator [x,y,z] array_result = if iterator `elem` [x,y,z]
+                                                                         then if iterator == x
+                                                                                 then principal_secondpartfor_score_1_3 (tail cfg) (iterator+1) [x,y,z] ((head cfg,z):array_result)
+                                                                                 else if iterator == y
+                                                                                         then principal_secondpartfor_score_1_3 (tail cfg) (iterator+1) [x,y,z] ((head cfg,x):array_result)
+                                                                                         else principal_secondpartfor_score_1_3 (tail cfg) (iterator+1) [x,y,z] ((head cfg,y):array_result)
+                                                                         else principal_secondpartfor_score_1_3 (tail cfg) (iterator+1) [x,y,z] (array_result)
+{-
+Funcion del paso 2 para el secore 0 4 que hace que siempre las posciones vayan a otras posiciones diferentes. Siempre me llegan valores distintos del 1 al 4. Podria ser [2,1,3,4], lo que hace la funcion es tomar un arreglo del tipo [m,n,o,p] y cambian sus posiciones de m->o,n->m
+o->p y p->n. Si mi cfg es [5 3 1 2] y mis numeros aleatorios son[4,2,1,3] m->o (el 4 elemento  se coloca en la 1 posicion) n->m (el 2 elemento va a la 4 posicion) o->p (el 1 elemento va a la 3 posicon) y p ->n (el 3 elemento va a la 2 posicion) y quedaria [2,1,5,3]
+-}
+principal_secondpartfor_score_0_4 ::[Int]->Int->[Int]->[(Int,Int)]->[(Int,Int)]
+principal_secondpartfor_score_0_4 [] iterator [m,n,o,p] array_result = array_result
+principal_secondpartfor_score_0_4 cfg iterator [m,n,o,p] array_result = if iterator `elem` [m,n,o,p]
+                                                                         then if iterator == m
+                                                                                 then principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] ((head cfg,o):array_result)
+                                                                                 else if iterator == n
+                                                                                         then principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] ((head cfg,m):array_result)
+                                                                                         else if iterator == o
+                                                                                                 then principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] ((head cfg,p):array_result)
+                                                                                                 else principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] ((head cfg,n):array_result)
+                                                                         else principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] (array_result)
