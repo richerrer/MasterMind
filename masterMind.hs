@@ -186,3 +186,27 @@ verify_for_step3 array [] = True                                              --
 verify_for_step3 array array2 = if fst(head array2) `elem` array
                                  then False                                 -- si el elemento de nuestro proximo posible cfg ya esta en la lista de mi cfg, entonces esnumero no es permitido
                                  else verify_for_step3 (array) (tail array2)     -- recorro la lista
+{-
+Funcion principal_step3 que recibe ya los numeros verificados(select_numbers) que iran en las nuevas posiciones dadas por (position_numbers) para unirlo en una nueva funcion.
+-}
+principal_step3::[Int]->[Int]->Int->[(Int,Int)]->[(Int,Int)]
+principal_step3 [](incorrect_position) (iterator) (array_result) = array_result
+principal_step3 (select_numbers) (incorrect_position) (iterator) (array_result) = if iterator `elem` incorrect_position
+                                                                                     then principal_step3 (select_numbers) (incorrect_position) (iterator+1) (array_result)
+                                                                                     else principal_step3 (tail select_numbers) (incorrect_position) (iterator+1) ((head select_numbers,iterator):array_result)
+
+extraer_posiciones :: [(Int,Int)]->[Int]->[Int]
+extraer_posiciones [] new_array = new_array
+extraer_posiciones array new_array = extraer_posiciones (tail array)(snd (head array):new_array) 
+{-
+Funcion result_fornew_cfg que recibe el array de ayuda que itera para ordenar el codigo, array2 es el mismo array que nunca de modifica a diferencia del array1 que al iterarlo
+cada vez envia en via el array1 sin la cabeza cosa que al encontrar el numero que busca array1 vuelve a ser array2 que nunca se modifica para volverlo a iterar en busca de la
+ siguiente posicion 
+-}
+result_fornew_cfg :: [(Int,Int)]->[(Int,Int)]->[Int]->Int->[Int]
+result_fornew_cfg [] array2 result_Array iterator = result_Array 
+result_fornew_cfg array1 array2 result_Array iterator = if snd(head array1) == iterator
+                                                             then result_fornew_cfg (array2) (array2) (result_Array++[fst(head array1)]) (iterator+1)
+                                                             else result_fornew_cfg (tail array1) (array2) (result_Array) (iterator)
+for_score_1_3 :: [Int]->[(Int,Int)]
+for_score_1_3 [x,y,z] =[(x,z),(y,x),(z,y)]
