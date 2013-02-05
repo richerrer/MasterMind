@@ -152,3 +152,18 @@ comparar_existencia_codigo [] guess_code = False
 comparar_existencia_codigo combinaciones guess_code = if fst (head combinaciones)== guess_code && snd (head combinaciones) ==1
                                                          then True
 													     else comparar_existencia_codigo (tail combinaciones) guess_code
+{-
+Funcion selec_potencial_code que recibe el cfg, el score del cfg, el nuevo posible codigo potencial y el score de ese posible codigo potencial y verfica cual es 
+el nuevo codigo potencial ya sea el anterior o el ahora adivinado segun el distance to goal.
+-}
+selec_potencial_code::[Int]->[Int]->[Int]->[Int]->[Int]
+selec_potencial_code cfg bestScore guess_code score_ofguess = if get_distanceToGoal (bestScore) > get_distanceToGoal (score_ofguess)
+                                                                 then cfg
+																 else guess_code
+{-
+Funcion selec_bestScore que segun el mas alto score dado por el distance to goal supone que es el score del ahora codigo potencial ya que este siempre tendra mayor score
+-}
+selec_bestScore::[Int]->[Int]->[Int]
+selec_bestScore bestScore score_ofguess = if get_distanceToGoal (bestScore) > get_distanceToGoal (score_ofguess)
+                                             then bestScore
+											 else score_ofguess
