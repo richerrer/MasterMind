@@ -167,3 +167,22 @@ selec_bestScore::[Int]->[Int]->[Int]
 selec_bestScore bestScore score_ofguess = if get_distanceToGoal (bestScore) > get_distanceToGoal (score_ofguess)
                                              then bestScore
 											 else score_ofguess
+{-
+Funcion principal_step1 que recibe el codigo potencial, el arreglo con los numeros de las posiciones que queremos mantener en uestro nuevo codigo ejemplo 
+[3,4,6,7] [2] 1 []. se envia el iterador al principio como 1 y el arreglo que se decvuelve se lo envia como vacio al principio.El resultado del ejemplo anteriror es
+[(4,2)]
+-}
+principal_step1::[Int]->[Int]->Int->[(Int,Int)]->[(Int,Int)]
+principal_step1 [] random_pos iterator  array_result = array_result
+principal_step1 cfg random_pos iterator  array_result = if iterator `elem` random_pos
+                                                             then principal_step1 (tail cfg) (random_pos) (iterator+1)  (((head cfg),iterator):array_result)
+                                                             else principal_step1 (tail cfg) (random_pos) (iterator+1)  (array_result)
+{-
+Funcion verify_for_step3 que verifica que los numeros enviados por la computadora (seleccionados aleatoriamente) sean diferentes a los ya seleccionados
+para nuestro proximo posible codigo potencial.
+-}
+verify_for_step3 ::[Int]->[(Int,Int)]->Bool
+verify_for_step3 array [] = True                                              -- si nunca lo encontro entonces esos numeros son posibles
+verify_for_step3 array array2 = if fst(head array2) `elem` array
+                                 then False                                 -- si el elemento de nuestro proximo posible cfg ya esta en la lista de mi cfg, entonces esnumero no es permitido
+                                 else verify_for_step3 (array) (tail array2)     -- recorro la lista
