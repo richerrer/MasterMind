@@ -4,6 +4,78 @@ generar_combinaciones = let
                          numeros =[1..6]
                          combinaciones = [([w,x,y,z],0)|w<-numeros,x<-numeros,y<-numeros,z<-numeros]
 					    in combinaciones
+						
+main::[Int]->[Int]->[Int]->[Int]->[([Int],Int)]->IO()
+main code cfg last_guess [4,0] combinaciones=do
+	putStr $ "TERMINO "
+main code [] [] [] []=do
+	gen1 <- newStdGen
+	gen2 <- newStdGen
+	gen3 <- newStdGen
+	gen4 <- newStdGen
+	let
+		rand1 = gen1
+		rand2 = gen2
+		rand3 = gen3
+		rand4 = gen4
+		combinaciones = generar_combinaciones
+		cfg =[fst(randomR (1,6)(rand1) :: (Int, StdGen)),fst(randomR (1,6)(rand2) :: (Int, StdGen)),fst(randomR (1,6)(rand3) :: (Int, StdGen)),fst(randomR (1,6)(rand4) :: (Int, StdGen))]--fst(randomR (1,6)(rand1) :: (Int, StdGen)),fst(randomR (1,6)(rand2) :: (Int, StdGen)),fst(randomR (1,6)(rand3) :: (Int, StdGen)),fst(randomR (1,6)(rand4) :: (Int, StdGen))
+		nuevas_combinaciones = eliminar_segunCodigo combinaciones cfg []
+		score = score_complete code cfg
+	printMessage cfg cfg score score
+	main code cfg cfg score combinaciones
+main code cfg last_guess [0,1] combinaciones = do
+    gen1 <- newStdGen
+    gen2 <- newStdGen
+    gen3 <- newStdGen
+    gen4 <- newStdGen
+    gen5 <- newStdGen
+    gen6 <- newStdGen
+    gen7 <- newStdGen
+    let
+         rand1 = gen1
+         rand2 = gen2
+         rand3 = gen3
+         rand4 = gen4
+         rand5 = gen5
+         rand6 = gen6
+         rand7 = gen7
+         num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num2 = fst(randomR (1,4)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num3 = fst(randomR (1,4)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num4 = fst(randomR (1,4)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num5 = fst(randomR (1,6)(rand5) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num6 = fst(randomR (1,6)(rand6) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num7 = fst(randomR (1,6)(rand7) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+    if (num1/=num2 && num1/=num3 && num1/=num4 && num2/=num3 && num2/=num4 && num3/=num4)
+         then do
+                 let
+                     randon_pos = [num1,num2,num3,num4]
+                     array_forstep2 = principal_step2 (cfg) [num1] [] [] 1 --obtengo un array con las numeros de las posiciones que deseo cambiar con sus nuevas posiciones y le envio que numeros ya no debe elegir en este caso es vacio porque no se realizo el paso 1
+                 if verify_for_step3 [num5,num6,num7] (array_forstep2)                  --verifica que los 3 numeros para el paso 3 no esten en mi posible nuevo codigo potencial
+                     then do
+                             --imprime [0,0,0,0,num1,num2,num3,num4,num5,num6,num7]
+                             let
+                                 incorrect_pos = extraer_posiciones (array_forstep2) []
+                                 array_forstep3 = principal_step3 [num5,num6,num7] (incorrect_pos) (1) [] --obtiene el arreglo con los numeros y en posiciones que me devuelve el paso 3
+                                 new_guess_code = result_fornew_cfg (array_forstep2++array_forstep3) (array_forstep2++array_forstep3) [] 1
+                             if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                                 then main code cfg last_guess [0,1] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                                 else do
+                                         let
+                                             nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []
+                                             score = score_complete (code) (new_guess_code)
+                                             new_cfg = selec_potencial_code (cfg) ([0,1]) (new_guess_code) (score)
+                                             score_ofnew_cfg = selec_bestScore ([0,1]) (score)
+                                         if score == [0,0]
+                                             then do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+                                             else do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+                     else main code cfg last_guess [0,1] combinaciones  --si algun  numero para el paso 3 esta en nuestro posible cfg se vuelve a repetir la funcion
+         else main code cfg last_guess [0,1] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
 {-Funcion que se encarga de llamar a las funciones que imprimen los mensajes en el txt
 -}
 printMessage :: [Int]->[Int]->[Int]->[Int]->IO()
