@@ -238,3 +238,46 @@ principal_secondpartfor_score_0_4 cfg iterator [m,n,o,p] array_result = if itera
                                                                                                  then principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] ((head cfg,p):array_result)
                                                                                                  else principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] ((head cfg,n):array_result)
                                                                          else principal_secondpartfor_score_0_4 (tail cfg) (iterator+1) [m,n,o,p] (array_result)
+{-
+Funcion que de un arreglo por ejemplo [4,2,2,1] devuelve siempre 4 numeros diferentes del 1 al 4. cabe recalcar que el 1 elemento del 1 arreglo solo puede ser del 1 al 4
+el 2 elemento del 1 al 3, el 3 elemento del 1 al 2 y el ultimo el 1. Nuestra lista referencial siempre es constante y es [4,2,1,3] y lo que hace es busca el 4 elemento dado por nuestra 1 lista
+y lo saca de la lista refrencial (3 )y ahora tenemos [4,2,1], ahora saca el 2 elemento dado por nuestra primera lista de la lista ahora refrencial (2) y nos queda [4,1], ahora
+saca el 2 elemento dado por nuestra primera lista de la lisat ahora refencial (1) y ahora es [4] y por ultimo saco el 1 elemento dado por la primera lista (4) quedandome los 
+numero aleatorios [3,2,1,4]
+-}
+num_aleatorios :: [Int]->[Int]->[Int]->[Int]
+num_aleatorios [num1,num2,num3,num4] lista_referencial lista_resultado = let 
+                                                                             new_num1 = lista_referencial !! (num1-1)   --me saca el numero de la posicion num1 de la lista referencial
+                                                                             lista_extraida1 = extraer_num_de_list new_num1 lista_referencial []
+                                                                             new_num2 = lista_extraida1 !! (num2-1)    --me saca el numero de la posicion num2 de lista_extraida1
+                                                                             lista_extraida2 = extraer_num_de_list new_num2 lista_extraida1 []
+                                                                             new_num3 = lista_extraida2 !! (num3-1)
+                                                                             lista_extraida3 = extraer_num_de_list new_num3 lista_extraida2 []
+                                                                             new_num4 = lista_extraida3 !! (num4-1)
+                                                                         in [new_num1,new_num2,new_num3,new_num4]
+{-
+Funcion que extrae un numero de random_list que es una lista y la variable lista se la envia como vacia para que guarde los numeros sin el numero enviado
+-}
+extraer_num_de_list:: Int -> [Int]-> [Int]->[Int]
+extraer_num_de_list numero [] lista = lista
+extraer_num_de_list numero random_list lista = if numero == head random_list
+                                                     then extraer_num_de_list (numero) (tail random_list) (lista)
+                                                     else extraer_num_de_list (numero) (tail random_list) (lista++[head random_list])
+{-
+Funcion get_distanceToGoal que me da el numero segun el score
+-}
+get_distanceToGoal :: [Int]->Int
+get_distanceToGoal [0,0] = 0
+get_distanceToGoal [0,1] = 1
+get_distanceToGoal [1,0] = 2
+get_distanceToGoal [0,2] = 3
+get_distanceToGoal [1,1] = 4
+get_distanceToGoal [2,0] = 5
+get_distanceToGoal [0,3] = 6
+get_distanceToGoal [1,2] = 7
+get_distanceToGoal [2,1] = 8
+get_distanceToGoal [3,0] = 9
+get_distanceToGoal [0,4] = 10
+get_distanceToGoal [1,3] = 11
+get_distanceToGoal [2,2] = 12
+get_distanceToGoal [4,0] = 13
