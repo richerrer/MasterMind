@@ -1,10 +1,32 @@
-iimport System.Random
+import System.Random
+{-La funcion principal que se encarga de leer el arcivo y llamar a la segunda funcion principal.
+-}
+play :: IO()
+play = do
+	c<-readFile "codigo.txt"
+	let
+		head_1 = head c
+		tail_1 = tail c
+		num1 = (fromEnum head_1)-48
+		head_2 = head tail_1
+		tail_2 = tail tail_1
+		num2 = (fromEnum head_2)-48
+		head_3 = head tail_2
+		tail_3 = tail tail_2
+		num3 = (fromEnum head_3)-48
+		head_4 = head tail_3
+		num4 = (fromEnum head_4)-48
+		code = [num1,num2,num3,num4]
+	writeFile "solution.txt" "RESOLUCION:\n"
+	main code [] [] [] []
+
+
 generar_combinaciones :: [([Int],Int)]
 generar_combinaciones = let
                          numeros =[1..6]
                          combinaciones = [([w,x,y,z],0)|w<-numeros,x<-numeros,y<-numeros,z<-numeros]
 					    in combinaciones
-						
+
 main::[Int]->[Int]->[Int]->[Int]->[([Int],Int)]->IO()
 main code cfg last_guess [4,0] combinaciones=do
 	putStr $ "TERMINO "
@@ -230,12 +252,474 @@ main code cfg last_guess [1,1] combinaciones = do
                                                      main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
                      else main code cfg last_guess [1,1] combinaciones  --si algun  numero para el paso 3 esta en nuestro posible cfg se vuelve a repetir la funcion
          else main code cfg last_guess [1,1] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
-{-Funcion que se encarga de llamar a las funciones que imprimen los mensajes en el txt
--}
+main code cfg last_guess [2,0] combinaciones = do
+    gen1 <- newStdGen
+    gen2 <- newStdGen
+    gen3 <- newStdGen
+    gen4 <- newStdGen
+    gen5 <- newStdGen
+    gen6 <- newStdGen
+    gen7 <- newStdGen
+    let
+         rand1 = gen1
+         rand2 = gen2
+         rand3 = gen3
+         rand4 = gen4
+         rand5 = gen5
+         rand6 = gen6
+         rand7 = gen7
+         num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num2 = fst(randomR (1,3)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num3 = fst(randomR (1,2)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num4 = fst(randomR (1,1)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num5 = fst(randomR (1,6)(rand5) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num6 = fst(randomR (1,6)(rand6) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num7 = fst(randomR (1,6)(rand7) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         [new_num1,new_num2,new_num3,new_num4] = num_aleatorios [num1,num2,num3,num4] [4,2,1,3] []
+    if (new_num1/=new_num2 && new_num1/=new_num3 && new_num1/=new_num4 && new_num2/=new_num3 && new_num2/=new_num4 && new_num3/=new_num4)
+         then do
+                 let
+                     randon_pos = [num1,num2,num3,num4]
+                     array_forstep1 = principal_step1 (cfg) [new_num1,new_num2] (1) []
+                 if verify_for_step3 [num5,num6] (array_forstep1)                  --verifica que los numeros para el paso 3 no esten en mi posible nuevo codigo potencial
+                     then do
+                             let
+                                 incorrect_pos = extraer_posiciones (array_forstep1) []
+                                 array_forstep3 = principal_step3 [num5,num6] (incorrect_pos) (1) [] --obtiene el arreglo con los numeros y en posiciones que me devuelve el paso 3
+                                 new_guess_code = result_fornew_cfg (array_forstep1++array_forstep3) (array_forstep1++array_forstep3) [] 1
+                             if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                                 then main code cfg last_guess [2,0] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                                 else do
+                                         let
+                                             nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []
+                                             score = score_complete (code) (new_guess_code)
+                                             new_cfg = selec_potencial_code (cfg) ([2,0]) (new_guess_code) (score)
+                                             score_ofnew_cfg = selec_bestScore ([2,0]) (score)
+                                         if score == [0,0]
+                                             then do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+                                             else do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+                     else main code cfg last_guess [2,0] combinaciones  --si algun  numero para el paso 3 esta en nuestro posible cfg se vuelve a repetir la funcion
+         else do
+                 main code cfg last_guess [2,0] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main code cfg last_guess [0,3] combinaciones = do
+    gen1 <- newStdGen
+    gen2 <- newStdGen
+    gen3 <- newStdGen
+    gen4 <- newStdGen
+    gen5 <- newStdGen
+    gen6 <- newStdGen
+    gen7 <- newStdGen
+    let
+         rand1 = gen1
+         rand2 = gen2
+         rand3 = gen3
+         rand4 = gen4
+         rand5 = gen5
+         rand6 = gen6
+         rand7 = gen7
+         num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num2 = fst(randomR (1,4)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num3 = fst(randomR (1,4)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num4 = fst(randomR (1,4)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num5 = fst(randomR (1,6)(rand5) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num6 = fst(randomR (1,6)(rand6) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num7 = fst(randomR (1,6)(rand7) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+    if (num1/=num2 && num1/=num3 && num1/=num4 && num2/=num3 && num2/=num4 && num3/=num4)
+         then do
+                 let
+                     randon_pos = [num1,num2,num3,num4]
+                     array_forstep2 = principal_step2 (cfg) [num1,num2,num3] [] [] 1 --obtengo un array con las numeros de las posiciones que deseo cambiar con sus nuevas posiciones y le envio que numeros ya no debe elegir en este caso es vacio porque no se realizo el paso 1
+                 if verify_for_step3 [num5] (array_forstep2)                  --verifica que los 3 numeros para el paso 3 no esten en mi posible nuevo codigo potencial
+                     then do
+                             let
+                                 incorrect_pos = extraer_posiciones (array_forstep2) []
+                                 array_forstep3 = principal_step3 [num5] (incorrect_pos) (1) [] --obtiene el arreglo con los numeros y en posiciones que me devuelve el paso 3
+                                 new_guess_code = result_fornew_cfg (array_forstep2++array_forstep3) (array_forstep2++array_forstep3) [] 1
+                             if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                                 then main code cfg last_guess [0,3] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                                 else do
+                                         let
+                                             nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []
+                                             score = score_complete (code) (new_guess_code)
+                                             new_cfg = selec_potencial_code (cfg) ([0,3]) (new_guess_code) (score)
+                                             score_ofnew_cfg = selec_bestScore ([0,3]) (score)
+                                         if score == [0,0]
+                                             then do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+                                             else do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+                     else main code cfg last_guess [0,3] combinaciones  --si algun  numero para el paso 3 esta en nuestro posible cfg se vuelve a repetir la funcion
+         else main code cfg last_guess [0,3] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main code cfg last_guess [0,0] combinaciones=do--una vez entregado el score 00 el cfg se elimina y busca otro random 
+	gen1 <- newStdGen
+	gen2 <- newStdGen
+	gen3 <- newStdGen
+	gen4 <- newStdGen
+	let
+         rand1 = gen1
+         rand2 = gen2
+         rand3 = gen3
+         rand4 = gen4
+         guess_code = [fst(randomR (1,6)(rand1) :: (Int, StdGen)),fst(randomR (1,6)(rand2) :: (Int, StdGen)),fst(randomR (1,6)(rand3) :: (Int, StdGen)),fst(randomR (1,6)(rand4) :: (Int, StdGen))]
+         modifico_combinaciones = eliminar_segunElementos (combinaciones) (last_guess) []
+	if comparar_existencia_codigo (modifico_combinaciones)(guess_code)
+         then do
+                 --putStr "no encuentro combinaciones"
+                 --imprime guess_code
+                 main code cfg last_guess [0,0] modifico_combinaciones                             --si el codigo generado por la maquina ya lo habia generado antes vuelve a llamar a la funcion con los mismos parametros
+         else do
+                 let
+                     nuevas_combinaciones = eliminar_segunCodigo (modifico_combinaciones) (guess_code) []   --elimino de la ultima modificacion de combinaciones, el numero seleccionado por la compu para que no se vuelva a repetir
+                     score = score_complete code guess_code                                                 --genero el resultado del codigo hecho por la computadora
+                     
+
+                 printMessage (guess_code) (guess_code) (score) (score)
+                 --main (code) (new_cfg) (guess_code) (score) (score_ofnew_cfg) (nuevas_combinaciones)
+                 main (code) (guess_code) (guess_code)(score) (nuevas_combinaciones)
+main code cfg last_guess [2,2] combinaciones=do
+         gen1 <- newStdGen
+         gen2 <- newStdGen
+         gen3 <- newStdGen
+         gen4 <- newStdGen
+         let 
+             rand1 = gen1
+             rand2 = gen2
+             rand3 = gen3
+             rand4 = gen4
+             num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+             num2 = fst(randomR (1,4)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+             num3 = fst(randomR (1,4)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+             num4 = fst(randomR (1,4)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+         if (num1/=num2 && num1/=num3 && num1/=num4 && num2/=num3 && num2/=num4 && num3/=num4)
+             then do
+                     let
+                        randon_pos = [num1,num2,num3,num4]
+                        array_forstep1 = principal_step1 (cfg) [num1,num2] (1) [] --obtengo un array para mantener las posiciones segun la lista de las posiciones.
+                        array_forstep2 = principal_step2 (cfg) [num3,num4] [num1,num2] [] 1 --obtengo un array con las numeros de las posiciones que deseo cambiar con sus nuevas posiciones y le envio que numeros ya no debe elegir
+                        new_guess_code = result_fornew_cfg (array_forstep1++array_forstep2) (array_forstep1++array_forstep2) [] 1
+                     if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                         then main code cfg last_guess [2,2] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                         else do
+                                 let
+                                     nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []   --elimino de la ultima modificacion de combinaciones, el numero seleccionado por la compu para que no se vuelva a repetir
+                                     score = score_complete (code) (new_guess_code)                                    --genero el resultado del codigo hecho por la computadora
+                                     new_cfg = selec_potencial_code (cfg) ([2,2]) (new_guess_code) (score)         --selecciono mi nuevo codigo potencial, el anterior o el nuevo, segun sus scores
+                                     score_ofnew_cfg = selec_bestScore ([2,2]) (score)                                 --selecciono mi score del nuevo cfg.Puede ser el bestScore enviado antes a la funcion o el score resultado del codigo dado por la maquina segun el distance to goal
+                                 if score == [0,0]
+                                     then do
+                                             printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                             main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+									 else do
+                                             printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                             main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+             else main code cfg last_guess [2,2] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main code cfg last_guess [1,2] combinaciones = do
+    gen1 <- newStdGen
+    gen2 <- newStdGen
+    gen3 <- newStdGen
+    gen4 <- newStdGen
+    gen5 <- newStdGen
+    gen6 <- newStdGen
+    gen7 <- newStdGen
+    let
+         rand1 = gen1
+         rand2 = gen2
+         rand3 = gen3
+         rand4 = gen4
+         rand5 = gen5
+         rand6 = gen6
+         rand7 = gen7
+         num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num2 = fst(randomR (1,3)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num3 = fst(randomR (1,2)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num4 = fst(randomR (1,1)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num5 = fst(randomR (1,6)(rand5) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num6 = fst(randomR (1,6)(rand6) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num7 = fst(randomR (1,6)(rand7) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         [new_num1,new_num2,new_num3,new_num4] = num_aleatorios [num1,num2,num3,num4] [4,2,1,3] []
+    if (new_num1/=new_num2 && new_num1/=new_num3 && new_num1/=new_num4 && new_num2/=new_num3 && new_num2/=new_num4 && new_num3/=new_num4)
+         then do
+                 let
+                     randon_pos = [num1,num2,num3,num4]
+                     array_forstep1 = principal_step1 (cfg) [new_num1] (1) []
+                     array_forstep2 = principal_step2 (cfg) [new_num2,new_num3] [new_num1] [] 1
+                 if 1==1--verify_for_step3 [num5] (array_forstep1++array_forstep2)                  --verifica que los numeros para el paso 3 no esten en mi posible nuevo codigo potencial
+                     then do
+                             let
+                                 incorrect_pos = extraer_posiciones (array_forstep1++array_forstep2) []
+                                 array_forstep3 = principal_step3 [num5] (incorrect_pos) (1) [] --obtiene el arreglo con los numeros y en posiciones que me devuelve el paso 3
+                                 new_guess_code = result_fornew_cfg (array_forstep1++array_forstep2++array_forstep3) (array_forstep1++array_forstep2++array_forstep3) [] 1
+                             if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                                 then main code cfg last_guess [1,2] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                                 else do
+                                         let
+                                             nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []
+                                             score = score_complete (code) (new_guess_code)
+                                             new_cfg = selec_potencial_code (cfg) ([1,2]) (new_guess_code) (score)
+                                             score_ofnew_cfg = selec_bestScore ([1,2]) (score)
+                                         if score == [0,0]
+                                             then do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+                                             else do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+                     else main code cfg last_guess [1,2] combinaciones  --si algun  numero para el paso 3 esta en nuestro posible cfg se vuelve a repetir la funcion
+         else do
+                 putStr "por posiciones"
+                 main code cfg last_guess [1,2] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main code cfg last_guess [2,1] combinaciones = do
+    gen1 <- newStdGen
+    gen2 <- newStdGen
+    gen3 <- newStdGen
+    gen4 <- newStdGen
+    gen5 <- newStdGen
+    gen6 <- newStdGen
+    gen7 <- newStdGen
+    let
+         rand1 = gen1
+         rand2 = gen2
+         rand3 = gen3
+         rand4 = gen4
+         rand5 = gen5
+         rand6 = gen6
+         rand7 = gen7
+         num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num2 = fst(randomR (1,4)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num3 = fst(randomR (1,4)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num4 = fst(randomR (1,4)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num5 = fst(randomR (1,6)(rand5) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num6 = fst(randomR (1,6)(rand6) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num7 = fst(randomR (1,6)(rand7) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+    if (num1/=num2 && num1/=num3 && num1/=num4 && num2/=num3 && num2/=num4 && num3/=num4)
+         then do
+                 let
+                     randon_pos = [num1,num2,num3,num4]
+                     array_forstep1 = principal_step1 (cfg) [num1,num2] (1) []
+                     array_forstep2 = principal_step2 (cfg) [num3] [num1,num2] [] 1
+                 if verify_for_step3 [num5] (array_forstep1++array_forstep2)                  --verifica que los numeros para el paso 3 no esten en mi posible nuevo codigo potencial
+                     then do
+                             let
+                                 incorrect_pos = extraer_posiciones (array_forstep1++array_forstep2) []
+                                 array_forstep3 = principal_step3 [num5] (incorrect_pos) (1) [] --obtiene el arreglo con los numeros y en posiciones que me devuelve el paso 3
+                                 new_guess_code = result_fornew_cfg (array_forstep1++array_forstep2++array_forstep3) (array_forstep1++array_forstep2++array_forstep3) [] 1
+                             if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                                 then main code cfg last_guess [2,1] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                                 else do
+                                         let
+                                             nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []
+                                             score = score_complete (code) (new_guess_code)
+                                             new_cfg = selec_potencial_code (cfg) ([2,1]) (new_guess_code) (score)
+                                             score_ofnew_cfg = selec_bestScore ([2,1]) (score)
+                                         if score == [0,0]
+                                             then do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+                                             else do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+                     else main code cfg last_guess [2,1] combinaciones  --si algun  numero para el paso 3 esta en nuestro posible cfg se vuelve a repetir la funcion
+         else main code cfg last_guess [2,1] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main code cfg last_guess [3,0] combinaciones = do
+    gen1 <- newStdGen
+    gen2 <- newStdGen
+    gen3 <- newStdGen
+    gen4 <- newStdGen
+    gen5 <- newStdGen
+    gen6 <- newStdGen
+    gen7 <- newStdGen
+    let
+         rand1 = gen1
+         rand2 = gen2
+         rand3 = gen3
+         rand4 = gen4
+         rand5 = gen5
+         rand6 = gen6
+         rand7 = gen7
+         num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num2 = fst(randomR (1,3)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num3 = fst(randomR (1,2)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num4 = fst(randomR (1,1)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+         num5 = fst(randomR (1,6)(rand5) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num6 = fst(randomR (1,6)(rand6) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         num7 = fst(randomR (1,6)(rand7) :: (Int, StdGen))--numero para el nuevo codigo potencial del 1 al 6 (no posicion) para usarlo en el paso 3.
+         [new_num1,new_num2,new_num3,new_num4] = num_aleatorios [num1,num2,num3,num4] [4,2,1,3] []
+    if (new_num1/=new_num2 && new_num1/=new_num3 && new_num1/=new_num4 && new_num2/=new_num3 && new_num2/=new_num4 && new_num3/=new_num4)
+         then do
+                 let
+                     randon_pos = [num1,num2,num3,num4]
+                     array_forstep1 = principal_step1 (cfg) [new_num1,new_num2,new_num3] (1) []               --obtengo un array para mantener las posiciones segun la lista de las posiciones.
+                 if 1==1--verify_for_step3 [num5] (array_forstep1)                  --verifica que los 3 numeros para el paso 3 no esten en mi posible nuevo codigo potencial
+                     then do
+                             let
+                                 incorrect_pos = extraer_posiciones (array_forstep1) []
+                                 array_forstep3 = principal_step3 [num5] (incorrect_pos) (1) [] --obtiene el arreglo con los numeros y en posiciones que me devuelve el paso 3
+                                 new_guess_code = result_fornew_cfg (array_forstep1++array_forstep3) (array_forstep1++array_forstep3) [] 1
+                             if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                                 then do 
+                                         --putStrLn "por combnacion"
+                                         main code cfg last_guess [3,0] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                                 else do
+                                         let
+                                             nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []
+                                             score = score_complete (code) (new_guess_code)
+                                             new_cfg = selec_potencial_code (cfg) ([3,0]) (new_guess_code) (score)
+                                             score_ofnew_cfg = selec_bestScore ([3,0]) (score)
+                                         if score == [0,0]
+                                             then do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+                                             else do
+                                                     printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                                     main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+                     else do
+                             main code cfg last_guess [3,0] combinaciones  --si algun  numero para el paso 3 esta en nuestro posible cfg se vuelve a repetir la funcion
+         else do 
+                 main code cfg last_guess [3,0] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main code cfg last_guess [1,3] combinaciones=do
+         gen1 <- newStdGen
+         gen2 <- newStdGen
+         gen3 <- newStdGen
+         gen4 <- newStdGen
+         let 
+             rand1 = gen1
+             rand2 = gen2
+             rand3 = gen3
+             rand4 = gen4
+             num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+             num2 = fst(randomR (1,4)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+             num3 = fst(randomR (1,4)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+             num4 = fst(randomR (1,4)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+         if (num1/=num2 && num1/=num3 && num1/=num4 && num2/=num3 && num2/=num4 && num3/=num4)
+             then do
+                     let
+                        randon_pos = [num1,num2,num3,num4]
+                        array_forstep1 = principal_step1 (cfg) [num1] (1) [] --obtengo un array para mantener las posiciones segun la lista de las posiciones.
+                        array_forstep2 = principal_secondpartfor_score_1_3 cfg 1 [num2,num3,num4] []
+                        new_guess_code = result_fornew_cfg (array_forstep1++array_forstep2) (array_forstep1++array_forstep2) [] 1
+                     if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                         then main code cfg last_guess [1,3] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                         else do
+                                 let
+                                     nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []   --elimino de la ultima modificacion de combinaciones, el numero seleccionado por la compu para que no se vuelva a repetir
+                                     score = score_complete (code) (new_guess_code)                                    --genero el resultado del codigo hecho por la computadora
+                                     new_cfg = selec_potencial_code (cfg) ([1,3]) (new_guess_code) (score)         --selecciono mi nuevo codigo potencial, el anterior o el nuevo, segun sus scores
+                                     score_ofnew_cfg = selec_bestScore ([1,3]) (score)                                 --selecciono mi score del nuevo cfg.Puede ser el bestScore enviado antes a la funcion o el score resultado del codigo dado por la maquina segun el distance to goal
+                                 if score == [0,0]
+                                     then do
+                                             printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                             main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+									 else do
+                                             printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                             main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+             else main code cfg last_guess [1,3] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main code cfg last_guess [0,4] combinaciones=do
+         gen1 <- newStdGen
+         gen2 <- newStdGen
+         gen3 <- newStdGen
+         gen4 <- newStdGen
+         let 
+             rand1 = gen1
+             rand2 = gen2
+             rand3 = gen3
+             rand4 = gen4
+             num1 = fst(randomR (1,4)(rand1) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4 debido a que son solo 4 los digitos para el codigo, no selecciona numeros del 1 al 6 debido a que no selecciona un codigo aleatorio sino solo una posicion
+             num2 = fst(randomR (1,3)(rand2) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+             num3 = fst(randomR (1,2)(rand3) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+             num4 = fst(randomR (1,1)(rand4) :: (Int, StdGen))--numero para elegir una posicion del 1 al 4
+             [new_num1,new_num2,new_num3,new_num4] = num_aleatorios [num1,num2,num3,num4] [4,2,1,3] []
+         if (new_num1/=new_num2 && new_num1/=new_num3 && new_num1/=new_num4 && new_num2/=new_num3 && new_num2/=new_num4 && new_num3/=new_num4)
+             then do
+                     let
+                        randon_pos = [new_num1,new_num2,new_num3,new_num4]
+                        array_forstep2 = principal_secondpartfor_score_0_4 cfg 1 [new_num1,new_num2,new_num3,new_num4] []  --obtengo un array con las numeros de las posiciones que deseo cambiar con sus nuevas posiciones y le envio que numeros ya no debe elegir
+                        new_guess_code = result_fornew_cfg (array_forstep2) (array_forstep2) [] 1
+                     if comparar_existencia_codigo (combinaciones)(new_guess_code)
+                         then do
+                                 putStrLn "ya se encuentra en la conjetura"
+                                 imprime randon_pos
+                                 imprime new_guess_code
+                                 main code cfg last_guess [0,4] combinaciones --si el nuevo codigo que obtuvo ya habia sido seleccionado anteriormente, vuelve a llamar a la funcion para que vuelva a generar el code guess segun los pasos dados
+                         else do
+                                 let
+                                     nuevas_combinaciones = eliminar_segunCodigo (combinaciones) (new_guess_code) []   --elimino de la ultima modificacion de combinaciones, el numero seleccionado por la compu para que no se vuelva a repetir
+                                     score = score_complete (code) (new_guess_code)                                    --genero el resultado del codigo hecho por la computadora
+                                     new_cfg = selec_potencial_code (cfg) ([0,4]) (new_guess_code) (score)         --selecciono mi nuevo codigo potencial, el anterior o el nuevo, segun sus scores
+                                     score_ofnew_cfg = selec_bestScore ([0,4]) (score)                                 --selecciono mi score del nuevo cfg.Puede ser el bestScore enviado antes a la funcion o el score resultado del codigo dado por la maquina segun el distance to goal
+                                 if score == [0,0]
+                                     then do
+                                             printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                             main (code) (new_cfg) (new_guess_code) ([0,0]) (nuevas_combinaciones)
+									 else do
+                                             printMessage (new_guess_code) (new_cfg) (score)(score_ofnew_cfg)
+                                             main (code) (new_cfg) (new_guess_code) (score_ofnew_cfg) (nuevas_combinaciones)
+             else main code cfg last_guess [0,4] combinaciones  --si algunas de las posiciones random son iguales, se vuelve a llamar a la misma funcion con los mismos parametros hasta que estos numerosrandom, sean diferentes
+main a b c d f =do
+    putStr $ "no se hace el resultado para este score "
+
 printMessage :: [Int]->[Int]->[Int]->[Int]->IO()
 printMessage guess cfg score bestScore= do
                                  imprime2 guess
-                                 imprime3 score	
+                                 imprime3 score								 
+                                 	
+								 
+{-								 
+printMessage :: [Int]->[Int]->[Int]->[Int]->IO()
+printMessage guess cfg score bestScore= do
+                                 putStr $ "\n\nEL NUMERO GENERADO ES: "
+                                 imprime guess
+                                 putStr $ ", EL RESULTADO DEL CODE MAKER ES : "
+                                 imprime score
+                                 putStr $ ", MI CODIGO POTENCIAL ES : "
+                                 imprime cfg
+                                 putStr $ ", EL RESULTADO DE MI CODIGO POTENCIAL ES : "
+                                 imprime bestScore
+-}								 
+	
+
+	
+{-
+Funcion step2 que recibe el codigo potencial, los arreglos de los numeros de las posiciones a elegir, un arreglo de las posiciones que no los puede 
+poner nuevamente un arreglo de arreglos con los numeros elegidos que al principio se envia vacio para poder ir colocando en el los numeors con las
+nuevas posiciones ejemplo [[5,2],[3,1]] 5 en la 2 posicion y 3 en la primera y por ultimo un contador que se envia en 1.
+-}
+principal_step2::[Int]->[Int]->[Int]->[(Int,Int)]->Int->[(Int,Int)]
+principal_step2 cfg random incorrect_position finish_array 5 = finish_array 
+principal_step2 cfg random incorrect_position finish_array iterador = if iterador `elem` random 
+                                                                         then
+															                 let new_pos = new_position iterador incorrect_position (1)
+															                     new_incorrect_position = new_pos:incorrect_position
+															                 in principal_step2 (tail cfg) random (new_incorrect_position) ((head cfg,new_pos):finish_array)(iterador+1)
+															             else principal_step2 (tail cfg) random (incorrect_position) finish_array(iterador+1)
+
+{-
+Funcion new_position que recibe el numero de la posicion en la que estoy y una lista con las posiciones a las que no me puedo mover, y un entero que al principio se envia como 1
+para que nos ayuda en que posicion nos estamos moviendo es decir un iterador. Si todas las posiciones estan ocupadas se vuelve 0 ya que no puede moverse
+a ninguna.
+-}		
+new_position :: Int->[Int]->Int->Int
+new_position actually_pos prohibited_pos 5 = 0
+new_position actually_pos prohibited_pos contador = if not(contador `elem` prohibited_pos) && contador /= actually_pos
+                                                     then contador
+													 else new_position actually_pos prohibited_pos (contador+1)
+
+													 
+													 
+{-
+Funcion que imprime un arreglo
+-}	
+imprime :: [Int]->IO()
+imprime [] = putStr " "
+imprime x = do
+            putStr $ show(head x)++" "
+            imprime (tail x)
+													 
 {-
 Funcion que imprime un arreglo en un archivo 
 -}	
@@ -261,30 +745,8 @@ imprime3 x = if (length x) == 2
 				else do
 					appendFile "solution.txt" (show(head x))
 					imprime3 (tail x)
-{-
-Funcion step2 que recibe el codigo potencial, los arreglos de los numeros de las posiciones a elegir, un arreglo de las posiciones que no los puede 
-poner nuevamente un arreglo de arreglos con los numeros elegidos que al principio se envia vacio para poder ir colocando en el los numeors con las
-nuevas posiciones ejemplo [[5,2],[3,1]] 5 en la 2 posicion y 3 en la primera y por ultimo un contador que se envia en 1.
--}
-principal_step2::[Int]->[Int]->[Int]->[(Int,Int)]->Int->[(Int,Int)]
-principal_step2 cfg random incorrect_position finish_array 5 = finish_array 
-principal_step2 cfg random incorrect_position finish_array iterador = if iterador `elem` random 
-                                                                         then
-															                 let new_pos = new_position iterador incorrect_position (1)
-															                     new_incorrect_position = new_pos:incorrect_position
-															                 in principal_step2 (tail cfg) random (new_incorrect_position) ((head cfg,new_pos):finish_array)(iterador+1)
-															             else principal_step2 (tail cfg) random (incorrect_position) finish_array(iterador+1)
+			
 
-{-
-Funcion new_position que recibe el numero de la posicion en la que estoy y una lista con las posiciones a las que no me puedo mover, y un entero que al principio se envia como 1
-para que nos ayuda en que posicion nos estamos moviendo es decir un iterador. Si todas las posiciones estan ocupadas se vuelve 0 ya que no puede moverse
-a ninguna.
--}		
-new_position :: Int->[Int]->Int->Int
-new_position actually_pos prohibited_pos 5 = 0
-new_position actually_pos prohibited_pos contador = if not(contador `elem` prohibited_pos) && contador /= actually_pos
-                                                     then contador
-													 else new_position actually_pos prohibited_pos (contador+1)
 
 {-
 Funcion recorrer_lista que recibe como parametros una lista de tuplas que contiene un arreglo y un entero, en nuestro caso
@@ -360,7 +822,6 @@ eliminar_segunElementos :: [([Int],Int)]->[Int]->[([Int],Int)]->[([Int],Int)]
 eliminar_segunElementos  [] codigo nuevas_combinaciones = nuevas_combinaciones
 eliminar_segunElementos combinaciones codigo nuevas_combinaciones =if existe_num_enList (fst(head combinaciones)) (codigo)==0 && snd(head combinaciones)==0 
                                                                      then eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),0):nuevas_combinaciones)
-
                                                                      else eliminar_segunElementos (tail combinaciones) codigo ((fst(head combinaciones),1):nuevas_combinaciones)
 {-
 Funcion existe_num_enList que recibe la lista de las conjeturas posibles y compara si algun numero de esta, se encuentra en la segunda lista que es del codigo seleccionado y devuelve 1 s asi lo es sino devuelve 0 que significa que ningun numero de las listas coinciden
@@ -436,7 +897,6 @@ result_fornew_cfg array1 array2 result_Array iterator = if snd(head array1) == i
                                                              else result_fornew_cfg (tail array1) (array2) (result_Array) (iterator)
 for_score_1_3 :: [Int]->[(Int,Int)]
 for_score_1_3 [x,y,z] =[(x,z),(y,x),(z,y)]
-
 {-
 Funcion para el paso 2 para el score 1 3 que toma del arreglo [x,y,z] y cambia las posiciones [z,x,y] es decir si el arreglo es [1,3,2] devuelve [2,1,3] que quiere decir que el elemento de la posicion 1 lo coloca en la 2 el de la 3 en la 1 y el de la 2 en la 3 
 -}
