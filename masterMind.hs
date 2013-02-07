@@ -1,4 +1,4 @@
-import System.Random
+iimport System.Random
 generar_combinaciones :: [([Int],Int)]
 generar_combinaciones = let
                          numeros =[1..6]
